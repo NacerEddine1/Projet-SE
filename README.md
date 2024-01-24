@@ -1,41 +1,24 @@
 projet système d'exploitation
 
-q1: Quelles sont les structures de données à utiliser ?
+On veut effectuer en parallèle(En utilisant le modèle producteurs/consommateur) le produit de deux matrices: 
+B (n1* m1)  et C (n2 * m2) ⇒ la matrice résultante A=B*C ;
+Q1: Quelles sont les structures de données à utiliser ?
 
-1.Matrices B,C,A:
-Int B[n1][m1];
-Int B[n1][m1];
-Int B[n1][m1];
+Les matrices sont remplis par des valeurs aléatoires
+       Matrices (B, C, A) : Utilisées pour stocker les données des matrices B, C et la matrice résultante A.
 
-2.Tampon T:
-Int T[N];
-3.Mutex et Semaphore:
-pthread_mutex_t mutex;
-sem_t empty;
-sem_t full;
+Les résultats intermédiaires seront placés dans un tampon de taille “T[N]”.
+       Tampon (T) : tampon partagé entre les threads producteurs et consommateurs pour stocker les résultats intermédiaires.
+Q2: Comment allez-vous protéger l'accès à ces données?
 
-q2: Comment allez-vous protéger l'accès à ces données?
+Chaque threads producteurs calcule une ligne de la matrice résultante A et range les résultat dans le tampon T
+    on utulise des sémaphores pour synchroniser l'accès aux données partagées entre les threads ( empty , full ,mutex)
+    empty :  Gère la quantité d'espace vide dans le tampon qui stocke les résultats intermédiaires
+    full :  Gère la quantité d'espace occupé dans le tampon
+    mutex : Assure un accès exclusif au tampon partagé entre les threads
+Q3: Quels sont les risques?
 
-Pour protéger l'accès aux données partagées entre les threads
-Matrices B,C,A:
-pthread_mutex_lock(&mutex);
-// Accès à la matrice B
-// ...
-pthread_mutex_unlock(&mutex);
-Tampon T:
-pthread_mutex_lock(&mutex);
-// Accès au tampon T
-// ...
-pthread_mutex_unlock(&mutex);
+Les threads consommateurs consomment l'élément T[y]  le place dans la matrice résultante A  au bon emplacement!
+   Concurrence : Risque d'accès simultané aux données partagées par plusieurs threads    
+   interblocage : Risque qu'un ensemble de threads se bloque mutuellement
 
-q3: quels sont les risques?
-
-Conditions de concurrence : Les threads producteurs et consommateurs peuvent accéder simultanément aux données partagées, entraînant des conditions de concurrence. Cela peut conduire à des résultats imprévisibles si les opérations ne sont pas correctement synchronisées.
-
-Blocage: Des situations de blocage peuvent se produire si un thread attend une ressource détenue par un autre thread, et vice versa. Cela peut se produire si la synchronisation entre les threads n'est pas correctement gérée.
-
-Problèmes de performance : Une mauvaise gestion des threads et de la synchronisation peut entraîner des problèmes de performance, tels que des temps d'attente excessifs ou une utilisation inefficace des ressources du processeur.
-
-Erreurs de programmation : Des erreurs de programmation, telles que des accès incorrects à la mémoire partagée ou des index hors limites, peuvent provoquer des comportements inattendus et des plantages du programme.
-
-Taille du tampon insuffisante: Si la taille du tampon est trop petite, les producteurs et les consommateurs peuvent se bloquer mutuellement, entraînant un ralentissement du processus global.
